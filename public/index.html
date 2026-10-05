@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parking Slot Finder</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: 30px auto; padding: 0 15px; background: #eef2f7; }
+  h1 { text-align: center; color: #1565c0; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .slot { padding: 20px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; color: white; }
+  .free { background: #2e7d32; }
+  .occupied { background: #c62828; }
+  .slot small { display: block; font-weight: normal; margin-top: 6px; font-size: 0.8em; }
+</style>
+</head>
+<body>
+
+<h1>🅿️ Parking Slot Finder</h1>
+<div class="grid" id="slotsGrid"></div>
+
+<script>
+  const grid = document.getElementById('slotsGrid');
+
+  async function loadSlots() {
+    const res = await fetch('/api/slots');
+    const slots = await res.json();
+    grid.innerHTML = '';
+    slots.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'slot ' + (s.occupied ? 'occupied' : 'free');
+      div.innerHTML = `${s.name}<small>${s.occupied ? 'Occupied - tap to free' : 'Free - tap to occupy'}</small>`;
+      div.onclick = () => toggleSlot(s.id);
+      grid.appendChild(div);
+    });
+  }
+
+  async function toggleSlot(id) {
+    await fetch(`/api/slots/${id}/toggle`, { method: 'POST' });
+    loadSlots();
+  }
+
+  loadSlots();
+</script>
+
+</body>
+</html>
